@@ -1,0 +1,13 @@
+tarih;gun;sube_id;sube_adi;il;sube_tipi;ciro_tl;islem_adedi;ort_sepet_tl;pos_tl;nakit_tl;iptal_iade_tl;iptal_orani;indirim_tl;indirim_orani
+2026-11-22;Paz;IST-01;İstanbul Araştırma Hast. Ana Kantin;İstanbul;Hastane Kantini;46850;512;91.50;35137;11713;655;1.40;890;1.90
+2026-11-23;Pzt;IST-01;İstanbul Araştırma Hast. Ana Kantin;İstanbul;Hastane Kantini;76420;815;93.77;58843;17577;993;1.30;1452;1.90
+2026-11-24;Sal;IST-01;İstanbul Araştırma Hast. Ana Kantin;İstanbul;Hastane Kantini;84320;892;94.53;64926;19394;1012;1.20;1518;1.80
+2026-11-22;Paz;IST-02;İstanbul Merkez Kafe Şubesi;İstanbul;Kafe;29840;218;136.88;23275;6565;507;1.70;686;2.30
+2026-11-23;Pzt;IST-02;İstanbul Merkez Kafe Şubesi;İstanbul;Kafe;49120;352;139.55;38313;10807;786;1.60;4372;8.90
+2026-11-24;Sal;IST-02;İstanbul Merkez Kafe Şubesi;İstanbul;Kafe;44650;324;137.81;34827;9823;670;1.50;982;2.20
+2026-11-22;Paz;MUG-01;Muğla Bölge Hast. Kantin & Otomat;Muğla;Hastane & Otomat;18720;210;89.14;11419;7301;355;1.90;374;2.00
+2026-11-23;Pzt;MUG-01;Muğla Bölge Hast. Kantin & Otomat;Muğla;Hastane & Otomat;43200;475;90.95;27648;15552;691;1.60;864;2.00
+2026-11-24;Sal;MUG-01;Muğla Bölge Hast. Kantin & Otomat;Muğla;Hastane & Otomat;39850;438;90.98;25504;14346;598;1.50;797;2.00
+2026-11-22;Paz;IZM-01;İzmir Güney Hast. B Blok Kantin;İzmir;Hastane Kantini;28150;312;90.22;20831;7319;2393;8.50;563;2.00
+2026-11-23;Pzt;IZM-01;İzmir Güney Hast. B Blok Kantin;İzmir;Hastane Kantini;45600;495;92.12;33744;11856;3830;8.40;912;2.00
+2026-11-24;Sal;IZM-01;İzmir Güney Hast. B Blok Kantin;İzmir;Hastane Kantini;41280;448;92.14;30547;10733;619;1.50;825;2.00

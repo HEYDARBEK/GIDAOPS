@@ -1,0 +1,1147 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GıdaOps AI — Çok Şubeli Operasyonel Otomasyon & YZ Karar Destek Paneli</title>
+  <style>
+    :root {
+      --bg: #f4f6fa;
+      --surface: #ffffff;
+      --surface-alt: #f8fafc;
+      --border: #e2e8f0;
+      --text: #0f172a;
+      --muted: #64748b;
+      --primary: #1e3a8a;
+      --primary-light: #2563eb;
+      --primary-bg: #eff6ff;
+      --success: #059669;
+      --success-bg: #ecfdf5;
+      --warn: #d97706;
+      --warn-bg: #fffbeb;
+      --danger: #dc2626;
+      --danger-bg: #fef2f2;
+      --radius: 12px;
+      --shadow: 0 1px 3px rgba(15, 23, 42, 0.06), 0 4px 12px rgba(15, 23, 42, 0.04);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      font-size: 14px;
+    }
+
+    .topbar {
+      background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%);
+      color: #fff;
+      padding: 18px 28px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      box-shadow: 0 2px 10px rgba(15, 23, 42, 0.2);
+    }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .brand-logo {
+      width: 40px; height: 40px; border-radius: 10px;
+      background: rgba(255,255,255,0.14);
+      border: 1px solid rgba(255,255,255,0.25);
+      display: grid; place-items: center;
+      font-weight: 800; font-size: 15px; letter-spacing: 0.5px;
+    }
+    .brand h1 { font-size: 17px; font-weight: 700; letter-spacing: -0.2px; }
+    .brand p { font-size: 12px; color: #cbd5e1; }
+    .topbar-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+
+    select, input[type="text"] {
+      padding: 8px 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      font-size: 13px;
+      background: var(--surface);
+      color: var(--text);
+      outline: none;
+    }
+    .topbar select {
+      background: rgba(255,255,255,0.12);
+      color: #fff;
+      border-color: rgba(255,255,255,0.25);
+    }
+    .topbar select option { color: var(--text); background: #fff; }
+
+    .btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 8px 14px; border-radius: 8px;
+      font-size: 13px; font-weight: 600;
+      border: 1px solid transparent; cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .btn-primary { background: var(--primary-light); color: #fff; }
+    .btn-primary:hover { background: var(--primary); }
+    .btn-light { background: rgba(255,255,255,0.14); color: #fff; border-color: rgba(255,255,255,0.25); }
+    .btn-light:hover { background: rgba(255,255,255,0.24); }
+    .btn-outline { background: var(--surface); color: var(--text); border-color: var(--border); }
+    .btn-outline:hover { background: var(--surface-alt); border-color: #cbd5e1; }
+    .btn-success { background: var(--success); color: #fff; }
+    .btn-success:hover { background: #047857; }
+
+    .nav-tabs {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 28px;
+      display: flex;
+      gap: 4px;
+      overflow-x: auto;
+    }
+    .tab-btn {
+      padding: 13px 16px;
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      font-weight: 600;
+      font-size: 13px;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      white-space: nowrap;
+      transition: all 0.15s ease;
+    }
+    .tab-btn:hover { color: var(--text); }
+    .tab-btn.active { color: var(--primary-light); border-bottom-color: var(--primary-light); }
+    .tab-badge {
+      display: inline-block;
+      margin-left: 6px;
+      padding: 1px 7px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      background: var(--danger-bg);
+      color: var(--danger);
+    }
+
+    .container { max-width: 1400px; margin: 0 auto; padding: 22px 28px 48px; }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; animation: fadeIn 0.2s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+    .info-banner {
+      background: var(--primary-bg);
+      border: 1px solid #bfdbfe;
+      color: #1e3a8a;
+      padding: 11px 16px;
+      border-radius: 10px;
+      font-size: 12.5px;
+      margin-bottom: 18px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+    .kpi-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px;
+      box-shadow: var(--shadow);
+    }
+    .kpi-label { font-size: 12px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px; }
+    .kpi-value { font-size: 24px; font-weight: 800; margin: 6px 0 4px; color: var(--text); letter-spacing: -0.5px; }
+    .kpi-sub { font-size: 12px; color: var(--muted); }
+    .kpi-sub.good { color: var(--success); font-weight: 600; }
+    .kpi-sub.bad { color: var(--danger); font-weight: 600; }
+    .kpi-sub.warn { color: var(--warn); font-weight: 600; }
+
+    .grid-2 { display: grid; grid-template-columns: 1.35fr 1fr; gap: 18px; margin-bottom: 20px; }
+    .grid-equal { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 20px; }
+    @media (max-width: 980px) { .grid-2, .grid-equal { grid-template-columns: 1fr; } }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: var(--shadow);
+      margin-bottom: 18px;
+    }
+    .card-header {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    .card-title { font-size: 15px; font-weight: 700; color: var(--text); }
+    .card-desc { font-size: 12.5px; color: var(--muted); }
+
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th {
+      text-align: left;
+      padding: 10px 12px;
+      background: var(--surface-alt);
+      color: var(--muted);
+      font-weight: 700;
+      font-size: 11.5px;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+    td {
+      padding: 10px 12px;
+      border-bottom: 1px solid #f1f5f9;
+      vertical-align: middle;
+    }
+    tr:hover td { background: #f8fafc; }
+    .num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+    .badge {
+      display: inline-block;
+      padding: 3px 9px;
+      border-radius: 999px;
+      font-size: 11.5px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    .badge-danger { background: var(--danger-bg); color: var(--danger); }
+    .badge-warn { background: var(--warn-bg); color: var(--warn); }
+    .badge-success { background: var(--success-bg); color: var(--success); }
+    .badge-info { background: var(--primary-bg); color: var(--primary-light); }
+
+    .bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+    .bar-label { width: 205px; font-size: 12.5px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .bar-track { flex: 1; height: 22px; background: #f1f5f9; border-radius: 6px; overflow: hidden; position: relative; }
+    .bar-fill { height: 100%; border-radius: 6px; transition: width 0.35s ease; }
+    .bar-val { width: 92px; text-align: right; font-size: 12.5px; font-weight: 700; font-variant-numeric: tabular-nums; }
+
+    .svg-chart { width: 100%; height: 220px; display: block; }
+
+    .ai-box {
+      background: #0f172a;
+      color: #e2e8f0;
+      border-radius: 10px;
+      padding: 18px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 12.5px;
+      white-space: pre-wrap;
+      line-height: 1.6;
+      max-height: 390px;
+      overflow-y: auto;
+    }
+    .chat-log {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--surface-alt);
+      padding: 14px;
+      height: 290px;
+      overflow-y: auto;
+      margin-bottom: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .msg { padding: 10px 13px; border-radius: 10px; max-width: 88%; font-size: 13px; white-space: pre-wrap; }
+    .msg-user { align-self: flex-end; background: var(--primary-light); color: #fff; }
+    .msg-ai { align-self: flex-start; background: var(--surface); border: 1px solid var(--border); color: var(--text); }
+    .quick-prompts { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+    .chip {
+      font-size: 12px; padding: 5px 10px; border-radius: 999px;
+      background: var(--primary-bg); color: var(--primary);
+      border: 1px solid #bfdbfe; cursor: pointer; font-weight: 600;
+    }
+    .chip:hover { background: #dbeafe; }
+
+    .toast {
+      position: fixed; bottom: 20px; right: 20px;
+      background: #0f172a; color: #fff;
+      padding: 11px 16px; border-radius: 10px;
+      font-size: 13px; font-weight: 600;
+      box-shadow: 0 8px 24px rgba(15,23,42,0.25);
+      opacity: 0; pointer-events: none; transition: opacity 0.2s ease;
+      z-index: 100;
+    }
+    .toast.show { opacity: 1; }
+  </style>
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-logo">GO</div>
+      <div>
+        <h1>GıdaOps AI — Operasyonel Otomasyon & YZ Karar Destek Paneli</h1>
+        <p id="periodText">Çok Şubeli Kantin, Kafe & Otomat Karar Destek Sistemi</p>
+      </div>
+    </div>
+    <div class="topbar-actions">
+      <select id="cityFilter" title="İl Filtresi">
+        <option value="ALL">Tüm İller (10 Şube)</option>
+      </select>
+      <select id="branchFilter" title="Şube Filtresi">
+        <option value="ALL">Tüm Şubeler</option>
+      </select>
+      <label class="btn btn-light" style="cursor:pointer;">
+        📂 CSV Yükle
+        <input type="file" id="csvUpload" accept=".csv" style="display:none;" />
+      </label>
+      <button class="btn btn-success" id="btnExportReport">⬇ Yönetim Raporu (CSV)</button>
+    </div>
+  </header>
+
+  <nav class="nav-tabs" id="navTabs">
+    <button class="tab-btn active" data-tab="overview">1. Genel Bakış & Satış</button>
+    <button class="tab-btn" data-tab="anomalies">2. POS Anomali Motoru <span class="tab-badge" id="anomalyCountBadge">0</span></button>
+    <button class="tab-btn" data-tab="stock">3. Depo, Stok & Fire</button>
+    <button class="tab-btn" data-tab="forecast">4. Üretim Tahmini</button>
+    <button class="tab-btn" data-tab="purchase">5. Satın Alma Konsolidasyonu</button>
+    <button class="tab-btn" data-tab="finance">6. Finans & P&amp;L</button>
+    <button class="tab-btn" data-tab="ai">7. YZ Yönetici Brifingi & Asistan</button>
+  </nav>
+
+  <main class="container">
+    <div class="info-banner">
+      <div>
+        <strong>Operasyonel Otomasyon Katmanı:</strong> Çok noktalı şube ağından gelen POS/Z-raporu, stok-sayım, satın alma ve finans verilerini <em>manuel Excel işçiliği olmadan</em> tek merkezde birleştiren ve yapay zekâ destekli karar özeti üreten yönetim paneli.
+      </div>
+      <div id="dataStatus" style="font-weight:700;">Veri Kaynağı: 10 Şube × 30 Gün (Örnek Veri Seti)</div>
+    </div>
+
+    <section id="tab-overview" class="tab-panel active">
+      <div class="kpi-grid" id="overviewKpis"></div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">Günlük Toplam Ciro Trendi (30 Gün)</div>
+              <div class="card-desc">Hafta içi poliklinik/kampüs yoğunluğu ve hafta sonu kırılımı</div>
+            </div>
+          </div>
+          <svg id="trendSvg" class="svg-chart" viewBox="0 0 680 220"></svg>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">Şube Bazlı 30 Günlük Ciro Sıralaması</div>
+              <div class="card-desc">Seçili filtreye göre en yüksek hacimli noktalar</div>
+            </div>
+          </div>
+          <div id="branchBars"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Şube Operasyon Karnesi</div>
+            <div class="card-desc">POS / Nakit oranı, ortalama sepet, iptal oranı ve fire durumu</div>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Şube</th>
+                <th>İl</th>
+                <th>Tip</th>
+                <th class="num">30 Gün Ciro</th>
+                <th class="num">İşlem Adedi</th>
+                <th class="num">Ort. Sepet</th>
+                <th class="num">POS Oranı</th>
+                <th class="num">Ort. İptal %</th>
+                <th class="num">Fire Kaybı</th>
+              </tr>
+            </thead>
+            <tbody id="overviewTable"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section id="tab-anomalies" class="tab-panel">
+      <div class="kpi-grid" id="anomalyKpis"></div>
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Otomatik POS / Z-Raporu Anomali Alarmları</div>
+            <div class="card-desc">Z-Score (&lt; -2.1) ciro düşüşleri, %5+ iptal/iade ve %6+ indirim sapmaları anında işaretlenir.</div>
+          </div>
+          <button class="btn btn-outline" id="btnExportAnomalies">⬇ Anomalileri İndir (CSV)</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Tarih</th>
+                <th>Şube</th>
+                <th>İl</th>
+                <th>Anomali Türü</th>
+                <th>Seviye</th>
+                <th>Ölçülen Değer</th>
+                <th>Önerilen Aksiyon / Açıklama</th>
+              </tr>
+            </thead>
+            <tbody id="anomalyTable"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section id="tab-stock" class="tab-panel">
+      <div class="kpi-grid" id="stockKpis"></div>
+      <div class="grid-equal">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">Şube Bazlı Toplam Fire Kaybı (TL)</div>
+              <div class="card-desc">Reçete bazlı teorik tüketim ile fiili sayım farkı</div>
+            </div>
+          </div>
+          <div id="wasteBranchBars"></div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">Ürün Grubu Bazlı Fire Kaybı (TL)</div>
+              <div class="card-desc">En yüksek maliyet kaçağı oluşturan hammadde grupları</div>
+            </div>
+          </div>
+          <div id="wasteItemBars"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Reçete Bazlı Teorik vs. Fiili Tüketim Detayı</div>
+            <div class="card-desc">%6.5 üzeri fire "Kritik", %4.5–6.5 arası "Uyarı" olarak işaretlenir.</div>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Şube</th>
+                <th>Hammadde / Ürün</th>
+                <th class="num">Teorik Tüketim</th>
+                <th class="num">Fiili Tüketim</th>
+                <th class="num">Fire Miktarı</th>
+                <th class="num">Fire %</th>
+                <th class="num">Maliyet Kaybı (TL)</th>
+                <th>Durum</th>
+              </tr>
+            </thead>
+            <tbody id="stockTable"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section id="tab-forecast" class="tab-panel">
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-label">7 Günlük Tahmini Toplam Ciro</div>
+          <div class="kpi-value" id="fcTotalRev">-</div>
+          <div class="kpi-sub">Takvim & poliklinik katsayıları dahil</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Planlanan Tost Ekmeği</div>
+          <div class="kpi-value" id="fcTotalBread">-</div>
+          <div class="kpi-sub">Merkez mutfak / şube dağıtım planı</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Planlanan Unlu Mamul</div>
+          <div class="kpi-value" id="fcTotalPastry">-</div>
+          <div class="kpi-sub">Bayatlama firesini azaltma hedefli</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Tahmini Fire Azaltım Potansiyeli</div>
+          <div class="kpi-value" style="color:var(--success);">%30 – %40</div>
+          <div class="kpi-sub good">Sektörel referans bandı (talep tahmini ile)</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Gelecek 7 Gün — Üretim & Hazırlık Miktarı Tahmini</div>
+            <div class="card-desc">Üniversite vize/tatil takvimi ve hastane poliklinik yoğunluğuna göre dinamik hazırlık planı</div>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Tarih</th>
+                <th>Gün</th>
+                <th>Takvim / Yoğunluk Etkeni</th>
+                <th class="num">Talep Katsayısı</th>
+                <th class="num">Tahmini Ciro</th>
+                <th class="num">Tost Ekmeği</th>
+                <th class="num">Poğaça/Sandviç</th>
+                <th class="num">Kahve (Pors.)</th>
+                <th class="num">Çay (Pors.)</th>
+                <th>Stok Önerisi</th>
+              </tr>
+            </thead>
+            <tbody id="forecastTable"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section id="tab-purchase" class="tab-panel">
+      <div class="kpi-grid" id="purchaseKpis"></div>
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Merkezi Satın Alma Talep Havuzu & Tedarikçi Fiyat Artış Alarmları</div>
+            <div class="card-desc">Şubelerden gelen dağınık sipariş talepleri tek satın alma taslağında birleştirilir; %10+ zam yapan kalemler onay öncesi vurgulanır.</div>
+          </div>
+          <button class="btn btn-primary" id="btnExportPO">⬇ Merkezi Sipariş Taslağı (CSV)</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Kod</th>
+                <th>Ürün</th>
+                <th>Tedarikçi</th>
+                <th class="num">Talep Eden Şube</th>
+                <th class="num">Toplam Miktar</th>
+                <th class="num">Önceki Fiyat</th>
+                <th class="num">Güncel Fiyat</th>
+                <th class="num">Artış %</th>
+                <th class="num">Ek Maliyet Etkisi</th>
+                <th class="num">Sipariş Tutarı</th>
+                <th>Alarm</th>
+              </tr>
+            </thead>
+            <tbody id="purchaseTable"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section id="tab-finance" class="tab-panel">
+      <div class="kpi-grid" id="financeKpis"></div>
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Şube Bazlı Aylık Kârlılık (P&amp;L) ve Gıda Maliyeti Kontrolü</div>
+            <div class="card-desc">Sektörel gıda maliyeti hedef bandı <strong>%28 – %32</strong> olarak izlenir; %33 üzeri şubeler kırmızı işaretlenir.</div>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Şube</th>
+                <th>İl</th>
+                <th class="num">Aylık Ciro</th>
+                <th class="num">Gıda Maliyeti</th>
+                <th class="num">Gıda Mal. %</th>
+                <th class="num">Kira / İhale Payı</th>
+                <th class="num">Personel</th>
+                <th class="num">Diğer Giderler</th>
+                <th class="num">Net Kâr</th>
+                <th class="num">Net Marj %</th>
+              </tr>
+            </thead>
+            <tbody id="financeTable"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section id="tab-ai" class="tab-panel">
+      <div class="grid-equal">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">Otomatik Üst Yönetim Brifingi (WhatsApp / E-posta Hazır)</div>
+              <div class="card-desc">Seçili il/şube verilerinden anında derlenen yönetici özeti</div>
+            </div>
+            <div style="display:flex; gap:8px;">
+              <button class="btn btn-outline" id="btnCopyBrief">📋 Özeti Kopyala</button>
+              <button class="btn btn-primary" id="btnCopyPrompt">🤖 KVKK-Uyumlu ChatGPT Promptu</button>
+            </div>
+          </div>
+          <div class="ai-box" id="aiBriefBox"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">Operasyonel Veri Asistanı (Çevrimdışı Çalışır)</div>
+              <div class="card-desc">Veri setine doğal dilde soru sorun; sistem canlı hesaplama yaparak yanıtlasın.</div>
+            </div>
+          </div>
+          <div class="quick-prompts">
+            <button class="chip" data-q="En yüksek fire hangi şubelerde?">En yüksek fire nerede?</button>
+            <button class="chip" data-q="Kritik POS anomalilerini özetle">POS anomalileri neler?</button>
+            <button class="chip" data-q="Hangi şubeler gıda maliyeti hedefini aşıyor?">Gıda maliyeti aşanlar</button>
+            <button class="chip" data-q="Satın alma fiyat artışlarını göster">Satın alma zamları</button>
+            <button class="chip" data-q="En kârlı 3 şube hangisi?">En kârlı 3 şube</button>
+          </div>
+          <div class="chat-log" id="chatLog">
+            <div class="msg msg-ai">Merhaba! GıdaOps AI operasyonel verileri yüklendi. Yukarıdaki hazır sorulardan birine tıklayabilir veya şubeler, fire, ciro, satın alma ya da kârlılık hakkında soru sorabilirsiniz.</div>
+          </div>
+          <form id="chatForm" style="display:flex; gap:8px;">
+            <input type="text" id="chatInput" placeholder="Örn: İstanbul şubelerinin durumu nasıl?" style="flex:1;" />
+            <button type="submit" class="btn btn-primary">Sor</button>
+          </form>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="data/dashboard_data.js"></script>
+  <script>
+    (function () {
+      const state = {
+        data: window.GIDAOPS_DATA,
+        city: 'ALL',
+        branch: 'ALL'
+      };
+
+      const fmtTL = (n) => Math.round(n).toLocaleString('tr-TR') + ' ₺';
+      const fmtNum = (n) => Math.round(n).toLocaleString('tr-TR');
+      const fmtPct = (n) => '%' + Number(n).toFixed(1);
+
+      function showToast(msg) {
+        const t = document.getElementById('toast');
+        t.textContent = msg;
+        t.classList.add('show');
+        setTimeout(() => t.classList.remove('show'), 2600);
+      }
+
+      function initFilters() {
+        const citySel = document.getElementById('cityFilter');
+        const cities = [...new Set(state.data.branches.map(b => b.city))];
+        citySel.innerHTML = `<option value="ALL">Tüm İller (${state.data.branches.length} Şube)</option>` +
+          cities.map(c => `<option value="${c}">${c}</option>`).join('');
+        populateBranches();
+      }
+
+      function populateBranches() {
+        const brSel = document.getElementById('branchFilter');
+        const list = state.city === 'ALL'
+          ? state.data.branches
+          : state.data.branches.filter(b => b.city === state.city);
+        brSel.innerHTML = `<option value="ALL">Tüm Şubeler (${list.length})</option>` +
+          list.map(b => `<option value="${b.id}">${b.name}</option>`).join('');
+        state.branch = 'ALL';
+      }
+
+      function filterByScope(rows) {
+        return rows.filter(r => {
+          if (state.city !== 'ALL' && r.il !== state.city) return false;
+          if (state.branch !== 'ALL' && r.sube_id !== state.branch) return false;
+          return true;
+        });
+      }
+
+      function downloadCsv(filename, rows) {
+        if (!rows || !rows.length) return showToast('İndirilecek veri bulunamadı.');
+        const headers = Object.keys(rows[0]);
+        const csv = [
+          headers.join(';'),
+          ...rows.map(r => headers.map(h => {
+            const v = r[h] == null ? '' : String(r[h]);
+            return v.includes(';') || v.includes('"') ? `"${v.replace(/"/g, '""')}"` : v;
+          }).join(';'))
+        ].join('\r\n');
+        const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        a.click();
+        URL.revokeObjectURL(url);
+        showToast(`${filename} indirildi.`);
+      }
+
+      function renderTrendChart(posRows) {
+        const svg = document.getElementById('trendSvg');
+        const byDate = {};
+        posRows.forEach(r => { byDate[r.tarih] = (byDate[r.tarih] || 0) + r.ciro_tl; });
+        const dates = Object.keys(byDate).sort();
+        if (!dates.length) { svg.innerHTML = ''; return; }
+        const vals = dates.map(d => byDate[d]);
+        const maxV = Math.max(...vals) * 1.1;
+        const minV = Math.min(...vals) * 0.85;
+        const W = 680, H = 220, padL = 62, padR = 16, padT = 16, padB = 34;
+        const plotW = W - padL - padR, plotH = H - padT - padB;
+
+        const pts = vals.map((v, i) => {
+          const x = padL + (i / Math.max(1, dates.length - 1)) * plotW;
+          const y = padT + plotH - ((v - minV) / Math.max(1, maxV - minV)) * plotH;
+          return { x, y, v, d: dates[i] };
+        });
+
+        const linePath = pts.map((p, i) => `${i === 0 ? 'M' : 'L'}${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ');
+        const areaPath = `${linePath} L${pts[pts.length - 1].x.toFixed(1)},${padT + plotH} L${pts[0].x.toFixed(1)},${padT + plotH} Z`;
+
+        let grid = '';
+        for (let g = 0; g <= 3; g++) {
+          const y = padT + (g / 3) * plotH;
+          const val = maxV - (g / 3) * (maxV - minV);
+          grid += `<line x1="${padL}" y1="${y}" x2="${W - padR}" y2="${y}" stroke="#e2e8f0" stroke-dasharray="3,3" />`;
+          grid += `<text x="${padL - 8}" y="${y + 4}" text-anchor="end" font-size="10.5" fill="#64748b">${Math.round(val / 1000)}K ₺</text>`;
+        }
+
+        let xLabels = '';
+        const step = Math.max(1, Math.floor(dates.length / 6));
+        pts.forEach((p, i) => {
+          if (i % step === 0 || i === pts.length - 1) {
+            xLabels += `<text x="${p.x}" y="${H - 10}" text-anchor="middle" font-size="10.5" fill="#64748b">${p.d.slice(5)}</text>`;
+          }
+        });
+
+        const dots = pts.map(p => `<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="3.2" fill="#2563eb"><title>${p.d}: ${fmtTL(p.v)}</title></circle>`).join('');
+
+        svg.innerHTML = `
+          <defs>
+            <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#2563eb" stop-opacity="0.22"/>
+              <stop offset="100%" stop-color="#2563eb" stop-opacity="0.01"/>
+            </linearGradient>
+          </defs>
+          ${grid}
+          <path d="${areaPath}" fill="url(#areaGrad)" />
+          <path d="${linePath}" fill="none" stroke="#2563eb" stroke-width="2.4" />
+          ${dots}
+          ${xLabels}
+        `;
+      }
+
+      function renderHorizontalBars(elId, items, colorFn) {
+        const el = document.getElementById(elId);
+        if (!items.length) { el.innerHTML = '<p style="color:var(--muted)">Veri yok.</p>'; return; }
+        const max = Math.max(...items.map(i => i.val)) || 1;
+        el.innerHTML = items.map(i => `
+          <div class="bar-row">
+            <div class="bar-label" title="${i.label}">${i.label}</div>
+            <div class="bar-track">
+              <div class="bar-fill" style="width:${Math.max(4, (i.val / max) * 100).toFixed(1)}%; background:${colorFn(i)};"></div>
+            </div>
+            <div class="bar-val">${fmtTL(i.val)}</div>
+          </div>
+        `).join('');
+      }
+
+      function renderAll() {
+        const pos = filterByScope(state.data.posRows);
+        const anomalies = filterByScope(state.data.anomalies);
+        const stock = filterByScope(state.data.stockRows);
+        const pnl = filterByScope(state.data.pnlRows);
+        const purchase = state.data.purchaseItems;
+        const forecast = state.data.forecastDays;
+
+        document.getElementById('periodText').textContent = `Dönem: ${state.data.periodLabel} • Merkez Ofis Operasyonel Karar Destek Sistemi`;
+        document.getElementById('anomalyCountBadge').textContent = anomalies.length;
+
+        const totalRev = pos.reduce((a, c) => a + c.ciro_tl, 0);
+        const totalTx = pos.reduce((a, c) => a + c.islem_adedi, 0);
+        const totalWaste = stock.reduce((a, c) => a + c.fire_kaybi_tl, 0);
+        const totalCogs = pnl.reduce((a, c) => a + c.gida_maliyeti_tl, 0);
+        const avgCogsPct = totalRev ? (totalCogs / totalRev) * 100 : 0;
+        const totalProfit = pnl.reduce((a, c) => a + c.net_kar_tl, 0);
+
+        document.getElementById('overviewKpis').innerHTML = `
+          <div class="kpi-card">
+            <div class="kpi-label">30 Günlük Toplam Ciro</div>
+            <div class="kpi-value">${fmtTL(totalRev)}</div>
+            <div class="kpi-sub good">${fmtNum(totalTx)} toplam işlem • Ort. Sepet ${fmtTL(totalTx ? totalRev / totalTx : 0)}</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Ortalama Gıda Maliyeti</div>
+            <div class="kpi-value">${fmtPct(avgCogsPct)}</div>
+            <div class="kpi-sub ${avgCogsPct <= 32 ? 'good' : 'warn'}">Hedef sektör bandı: %28 – %32</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Tespit Edilen Fire Kaybı</div>
+            <div class="kpi-value" style="color:var(--danger);">${fmtTL(totalWaste)}</div>
+            <div class="kpi-sub bad">Reçete teorik vs. fiili sayım farkı</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Aktif POS Anomalisi</div>
+            <div class="kpi-value" style="color:${anomalies.length ? 'var(--warn)' : 'var(--success)'};">${anomalies.length} Vaka</div>
+            <div class="kpi-sub">Ciro düşüşü, yüksek iptal & indirim</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Tahmini Aylık Net Kâr</div>
+            <div class="kpi-value" style="color:var(--success);">${fmtTL(totalProfit)}</div>
+            <div class="kpi-sub good">Net Marj: ${fmtPct(totalRev ? (totalProfit / totalRev) * 100 : 0)}</div>
+          </div>
+        `;
+
+        renderTrendChart(pos);
+
+        const revByBranch = {};
+        pos.forEach(r => { revByBranch[r.sube_adi] = (revByBranch[r.sube_adi] || 0) + r.ciro_tl; });
+        renderHorizontalBars('branchBars',
+          Object.entries(revByBranch).map(([label, val]) => ({ label, val })).sort((a, b) => b.val - a.val),
+          () => '#2563eb'
+        );
+
+        const branchSummary = pnl.map(p => {
+          const bPos = pos.filter(r => r.sube_id === p.sube_id);
+          const tx = bPos.reduce((a, c) => a + c.islem_adedi, 0);
+          const posSum = bPos.reduce((a, c) => a + c.pos_tl, 0);
+          const avgCancel = bPos.length ? bPos.reduce((a, c) => a + c.iptal_orani, 0) / bPos.length : 0;
+          return { ...p, tx, avgBasket: tx ? p.aylik_ciro_tl / tx : 0, posRatio: p.aylik_ciro_tl ? (posSum / p.aylik_ciro_tl) * 100 : 0, avgCancel };
+        }).sort((a, b) => b.aylik_ciro_tl - a.aylik_ciro_tl);
+
+        document.getElementById('overviewTable').innerHTML = branchSummary.map(b => `
+          <tr>
+            <td><strong>${b.sube_adi}</strong></td>
+            <td>${b.il}</td>
+            <td><span class="badge badge-info">${b.sube_tipi}</span></td>
+            <td class="num"><strong>${fmtTL(b.aylik_ciro_tl)}</strong></td>
+            <td class="num">${fmtNum(b.tx)}</td>
+            <td class="num">${fmtTL(b.avgBasket)}</td>
+            <td class="num">${fmtPct(b.posRatio)}</td>
+            <td class="num"><span class="badge ${b.avgCancel >= 3 ? 'badge-danger' : 'badge-success'}">${fmtPct(b.avgCancel)}</span></td>
+            <td class="num" style="color:${b.fire_kaybi_tl > 45000 ? 'var(--danger)' : 'inherit'}; font-weight:700;">${fmtTL(b.fire_kaybi_tl)}</td>
+          </tr>
+        `).join('');
+
+        const critCount = anomalies.filter(a => a.seviye === 'Kritik').length;
+        const highCount = anomalies.filter(a => a.seviye === 'Yüksek').length;
+        const medCount = anomalies.filter(a => a.seviye === 'Orta').length;
+        document.getElementById('anomalyKpis').innerHTML = `
+          <div class="kpi-card"><div class="kpi-label">Toplam Anomali</div><div class="kpi-value">${anomalies.length}</div><div class="kpi-sub">Son 30 gün otomatik tarama</div></div>
+          <div class="kpi-card"><div class="kpi-label">Kritik (Ciro Düşüşü)</div><div class="kpi-value" style="color:var(--danger);">${critCount}</div><div class="kpi-sub bad">POS/Otomat kesintisi riski</div></div>
+          <div class="kpi-card"><div class="kpi-label">Yüksek (İptal/İade)</div><div class="kpi-value" style="color:var(--warn);">${highCount}</div><div class="kpi-sub warn">%5 eşiği üzeri kasa iptali</div></div>
+          <div class="kpi-card"><div class="kpi-label">Orta (İndirim Sapması)</div><div class="kpi-value">${medCount}</div><div class="kpi-sub">%6 eşiği üzeri indirim</div></div>
+        `;
+        document.getElementById('anomalyTable').innerHTML = anomalies.length
+          ? anomalies.map(a => `
+            <tr>
+              <td>${a.tarih}</td>
+              <td><strong>${a.sube_adi}</strong></td>
+              <td>${a.il}</td>
+              <td><strong>${a.tur}</strong></td>
+              <td><span class="badge ${a.seviye === 'Kritik' ? 'badge-danger' : a.seviye === 'Yüksek' ? 'badge-warn' : 'badge-info'}">${a.seviye}</span></td>
+              <td>${a.deger}</td>
+              <td>${a.aciklama}</td>
+            </tr>
+          `).join('')
+          : '<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:20px;">Seçili filtrede anomali tespit edilmedi.</td></tr>';
+
+        const critStock = stock.filter(s => s.durum === 'Kritik').length;
+        const avgWastePct = stock.length ? stock.reduce((a, c) => a + c.fire_orani, 0) / stock.length : 0;
+        document.getElementById('stockKpis').innerHTML = `
+          <div class="kpi-card"><div class="kpi-label">Toplam Aylık Fire Kaybı</div><div class="kpi-value" style="color:var(--danger);">${fmtTL(totalWaste)}</div><div class="kpi-sub bad">Yıllık projeksiyon: ${fmtTL(totalWaste * 12)}</div></div>
+          <div class="kpi-card"><div class="kpi-label">Ortalama Fire Oranı</div><div class="kpi-value">${fmtPct(avgWastePct)}</div><div class="kpi-sub">Hedef: %3.5 altı</div></div>
+          <div class="kpi-card"><div class="kpi-label">Kritik Kalem Sayısı</div><div class="kpi-value" style="color:var(--warn);">${critStock}</div><div class="kpi-sub warn">%6.5 üzeri fire veren şube-ürün</div></div>
+          <div class="kpi-card"><div class="kpi-label">%35 Azaltım Tasarrufu</div><div class="kpi-value" style="color:var(--success);">${fmtTL(totalWaste * 0.35)}</div><div class="kpi-sub good">Aylık potansiyel geri kazanım</div></div>
+        `;
+
+        const wasteByBranch = {};
+        const wasteByItem = {};
+        stock.forEach(s => {
+          wasteByBranch[s.sube_adi] = (wasteByBranch[s.sube_adi] || 0) + s.fire_kaybi_tl;
+          wasteByItem[s.urun_adi] = (wasteByItem[s.urun_adi] || 0) + s.fire_kaybi_tl;
+        });
+        renderHorizontalBars('wasteBranchBars',
+          Object.entries(wasteByBranch).map(([label, val]) => ({ label, val })).sort((a, b) => b.val - a.val),
+          (i) => i.val > 45000 ? '#dc2626' : '#f59e0b'
+        );
+        renderHorizontalBars('wasteItemBars',
+          Object.entries(wasteByItem).map(([label, val]) => ({ label, val })).sort((a, b) => b.val - a.val),
+          () => '#0f172a'
+        );
+
+        document.getElementById('stockTable').innerHTML = [...stock]
+          .sort((a, b) => b.fire_kaybi_tl - a.fire_kaybi_tl)
+          .map(s => `
+            <tr>
+              <td><strong>${s.sube_adi}</strong></td>
+              <td>${s.urun_adi}</td>
+              <td class="num">${fmtNum(s.teorik_tuketim)} ${s.birim}</td>
+              <td class="num">${fmtNum(s.fiili_tuketim)} ${s.birim}</td>
+              <td class="num">${fmtNum(s.fire_miktari)} ${s.birim}</td>
+              <td class="num"><strong>${fmtPct(s.fire_orani)}</strong></td>
+              <td class="num" style="color:var(--danger);font-weight:700;">${fmtTL(s.fire_kaybi_tl)}</td>
+              <td><span class="badge ${s.durum === 'Kritik' ? 'badge-danger' : s.durum === 'Uyarı' ? 'badge-warn' : 'badge-success'}">${s.durum}</span></td>
+            </tr>
+          `).join('');
+
+        document.getElementById('fcTotalRev').textContent = fmtTL(forecast.reduce((a, c) => a + c.tahmini_ciro_tl, 0));
+        document.getElementById('fcTotalBread').textContent = fmtNum(forecast.reduce((a, c) => a + c.tost_ekmegi_adet, 0)) + ' adet';
+        document.getElementById('fcTotalPastry').textContent = fmtNum(forecast.reduce((a, c) => a + c.unlu_mamul_adet, 0)) + ' adet';
+        document.getElementById('forecastTable').innerHTML = forecast.map(f => `
+          <tr>
+            <td><strong>${f.tarih}</strong></td>
+            <td>${f.gun}</td>
+            <td>${f.takvim_notu}</td>
+            <td class="num"><strong>${f.carpan.toFixed(2)}x</strong></td>
+            <td class="num">${fmtTL(f.tahmini_ciro_tl)}</td>
+            <td class="num">${fmtNum(f.tost_ekmegi_adet)}</td>
+            <td class="num">${fmtNum(f.unlu_mamul_adet)}</td>
+            <td class="num">${fmtNum(f.kahve_porsiyon)}</td>
+            <td class="num">${fmtNum(f.sicak_cay_porsiyon)}</td>
+            <td><span class="badge ${f.carpan > 1.15 ? 'badge-warn' : f.carpan < 0.6 ? 'badge-info' : 'badge-success'}">${f.onerilen_guvenlik_stoku}</span></td>
+          </tr>
+        `).join('');
+
+        const poTotal = purchase.reduce((a, c) => a + c.toplam_tutar_tl, 0);
+        const poExtra = purchase.reduce((a, c) => a + c.ek_maliyet_tl, 0);
+        const poAlarms = purchase.filter(p => p.alarm === 'Yüksek Artış').length;
+        document.getElementById('purchaseKpis').innerHTML = `
+          <div class="kpi-card"><div class="kpi-label">Konsolide Sipariş Toplamı</div><div class="kpi-value">${fmtTL(poTotal)}</div><div class="kpi-sub">${purchase.length} ana ürün grubu</div></div>
+          <div class="kpi-card"><div class="kpi-label">Fiyat Artışı Ek Maliyeti</div><div class="kpi-value" style="color:var(--danger);">${fmtTL(poExtra)}</div><div class="kpi-sub bad">Önceki fatura fiyatlarına göre fark</div></div>
+          <div class="kpi-card"><div class="kpi-label">Yüksek Zam Alarmı (%10+)</div><div class="kpi-value" style="color:var(--warn);">${poAlarms} Kalem</div><div class="kpi-sub warn">Alternatif teklif istenmeli</div></div>
+          <div class="kpi-card"><div class="kpi-label">Merkezi Pazarlık Hedefi (%5)</div><div class="kpi-value" style="color:var(--success);">${fmtTL(poTotal * 0.05)}</div><div class="kpi-sub good">Toplu alım tasarruf potansiyeli</div></div>
+        `;
+        document.getElementById('purchaseTable').innerHTML = purchase.map(p => `
+          <tr>
+            <td><code>${p.kod}</code></td>
+            <td><strong>${p.urun}</strong></td>
+            <td>${p.tedarikci}</td>
+            <td class="num">${p.talep_sube_sayisi} şube (${p.kritik_stok_sube} kritik)</td>
+            <td class="num">${fmtNum(p.toplam_miktar)} ${p.birim}</td>
+            <td class="num">${p.onceki_fiyat.toFixed(2)} ₺</td>
+            <td class="num"><strong>${p.guncel_fiyat.toFixed(2)} ₺</strong></td>
+            <td class="num" style="color:${p.fiyat_degisim_orani >= 10 ? 'var(--danger)' : 'inherit'};font-weight:700;">+${fmtPct(p.fiyat_degisim_orani)}</td>
+            <td class="num">${fmtTL(p.ek_maliyet_tl)}</td>
+            <td class="num"><strong>${fmtTL(p.toplam_tutar_tl)}</strong></td>
+            <td><span class="badge ${p.alarm === 'Yüksek Artış' ? 'badge-danger' : p.alarm === 'İncele' ? 'badge-warn' : 'badge-success'}">${p.alarm}</span></td>
+          </tr>
+        `).join('');
+
+        const totalRent = pnl.reduce((a, c) => a + c.kira_ihale_payi_tl, 0);
+        const totalStaff = pnl.reduce((a, c) => a + c.personel_gideri_tl, 0);
+        document.getElementById('financeKpis').innerHTML = `
+          <div class="kpi-card"><div class="kpi-label">Toplam Aylık Ciro</div><div class="kpi-value">${fmtTL(totalRev)}</div><div class="kpi-sub">${pnl.length} şube konsolide</div></div>
+          <div class="kpi-card"><div class="kpi-label">Gıda Maliyeti (COGS)</div><div class="kpi-value">${fmtTL(totalCogs)}</div><div class="kpi-sub ${avgCogsPct <= 32 ? 'good' : 'warn'}">Oran: ${fmtPct(avgCogsPct)} (Hedef %28–32)</div></div>
+          <div class="kpi-card"><div class="kpi-label">Kira & Kamu İhale Payı</div><div class="kpi-value">${fmtTL(totalRent)}</div><div class="kpi-sub">Ciroya oran: ${fmtPct(totalRev ? (totalRent / totalRev) * 100 : 0)}</div></div>
+          <div class="kpi-card"><div class="kpi-label">Net Operasyonel Kâr</div><div class="kpi-value" style="color:var(--success);">${fmtTL(totalProfit)}</div><div class="kpi-sub good">Personel: ${fmtTL(totalStaff)}</div></div>
+        `;
+        document.getElementById('financeTable').innerHTML = [...pnl]
+          .sort((a, b) => b.net_kar_tl - a.net_kar_tl)
+          .map(p => `
+            <tr>
+              <td><strong>${p.sube_adi}</strong></td>
+              <td>${p.il}</td>
+              <td class="num">${fmtTL(p.aylik_ciro_tl)}</td>
+              <td class="num">${fmtTL(p.gida_maliyeti_tl)}</td>
+              <td class="num"><span class="badge ${p.gida_maliyeti_orani > 33 ? 'badge-danger' : p.gida_maliyeti_orani > 32 ? 'badge-warn' : 'badge-success'}">${fmtPct(p.gida_maliyeti_orani)}</span></td>
+              <td class="num">${fmtTL(p.kira_ihale_payi_tl)}</td>
+              <td class="num">${fmtTL(p.personel_gideri_tl)}</td>
+              <td class="num">${fmtTL(p.diger_giderler_tl)}</td>
+              <td class="num" style="color:var(--success);font-weight:700;">${fmtTL(p.net_kar_tl)}</td>
+              <td class="num"><strong>${fmtPct(p.net_marj_orani)}</strong></td>
+            </tr>
+          `).join('');
+
+        document.getElementById('aiBriefBox').textContent = generateExecutiveBriefing(pos, anomalies, stock, pnl, purchase);
+      }
+
+      function generateExecutiveBriefing(pos, anomalies, stock, pnl, purchase) {
+        const totalRev = pnl.reduce((a, c) => a + c.aylik_ciro_tl, 0);
+        const totalWaste = stock.reduce((a, c) => a + c.fire_kaybi_tl, 0);
+        const totalProfit = pnl.reduce((a, c) => a + c.net_kar_tl, 0);
+        const top3 = [...pnl].sort((a, b) => b.net_kar_tl - a.net_kar_tl).slice(0, 3);
+        const wasteByBranch = {};
+        stock.forEach(s => { wasteByBranch[s.sube_adi] = (wasteByBranch[s.sube_adi] || 0) + s.fire_kaybi_tl; });
+        const topWaste = Object.entries(wasteByBranch).sort((a, b) => b[1] - a[1]).slice(0, 3);
+        const highPrice = purchase.filter(p => p.fiyat_degisim_orani >= 10);
+
+        return [
+          `📊 GIDAOPS AI — OTOMATİK YÖNETİCİ BRİFİNGİ`,
+          `Dönem: ${state.data.periodLabel}`,
+          `Kapsam: ${state.city === 'ALL' ? 'Tüm İller' : state.city} / ${state.branch === 'ALL' ? pnl.length + ' Şube' : pnl[0]?.sube_adi || ''}`,
+          `------------------------------------------------------`,
+          `1) FİNANSAL ÖZET`,
+          `• Toplam 30 Günlük Ciro : ${fmtTL(totalRev)}`,
+          `• Toplam Net Kâr        : ${fmtTL(totalProfit)} (${fmtPct(totalRev ? (totalProfit / totalRev) * 100 : 0)} marj)`,
+          `• Toplam Fire Kaybı     : ${fmtTL(totalWaste)} (Önlenebilir hedef %35: ${fmtTL(totalWaste * 0.35)}/ay)`,
+          ``,
+          `2) EN YÜKSEK KÂRLI 3 ŞUBE`,
+          ...top3.map((b, i) => `• ${i + 1}. ${b.sube_adi}: ${fmtTL(b.net_kar_tl)} net kâr (%${b.net_marj_orani})`),
+          ``,
+          `3) ACİL MÜDAHALE GEREKTİREN FİRE NOKTALARI`,
+          ...topWaste.map(([name, val], i) => `• ${i + 1}. ${name}: ${fmtTL(val)} aylık fire kaybı`),
+          ``,
+          `4) POS ANOMALİ UYARILARI (${anomalies.length} Vaka)`,
+          ...(anomalies.length ? anomalies.slice(0, 4).map(a => `• [${a.seviye}] ${a.tarih} — ${a.sube_adi}: ${a.tur} (${a.deger})`) : ['• Kritik anomali yok.']),
+          ``,
+          `5) SATIN ALMA FİYAT ARTIŞ ALARMI (%10+)`,
+          ...highPrice.map(p => `• ${p.urun} (${p.tedarikci}): +%${p.fiyat_degisim_orani} (+${fmtTL(p.ek_maliyet_tl)} ek maliyet)`),
+          ``,
+          `✅ ÖNERİLEN HAFTALIK AKSİYON: Yüksek fireli ilk 3 şubede reçete/porsiyon denetimi, %10+ zamlı kalemlerde alternatif tedarikçi teklifi alınması önerilir.`
+        ].join('\n');
+      }
+
+      function answerQuestion(q) {
+        const lower = q.toLowerCase();
+        const pnl = filterByScope(state.data.pnlRows);
+        const stock = filterByScope(state.data.stockRows);
+        const anomalies = filterByScope(state.data.anomalies);
+        const purchase = state.data.purchaseItems;
+
+        if (lower.includes('fire') || lower.includes('israf') || lower.includes('stok')) {
+          const map = {};
+          stock.forEach(s => { map[s.sube_adi] = (map[s.sube_adi] || 0) + s.fire_kaybi_tl; });
+          const top = Object.entries(map).sort((a, b) => b[1] - a[1]).slice(0, 3);
+          const total = stock.reduce((a, c) => a + c.fire_kaybi_tl, 0);
+          return `Toplam tespit edilen aylık fire kaybı ${fmtTL(total)}. En yüksek fire veren 3 şube:\n` +
+            top.map(([n, v], i) => `${i + 1}. ${n}: ${fmtTL(v)}`).join('\n') +
+            `\n\nÖneri: Unlu mamul ve kahve/süt gruplarında vize/poliklinik takvimine göre günlük üretim miktarı ayarlanarak aylık ~${fmtTL(total * 0.35)} tasarruf hedeflenebilir.`;
+        }
+        if (lower.includes('anomali') || lower.includes('iptal') || lower.includes('pos') || lower.includes('kasa')) {
+          if (!anomalies.length) return 'Seçili kapsamda POS anomalisi bulunmuyor.';
+          return `Son 30 günde ${anomalies.length} POS anomalisi yakalandı:\n` +
+            anomalies.map(a => `• ${a.tarih} | ${a.sube_adi} — ${a.tur} (${a.deger})`).join('\n');
+        }
+        if (lower.includes('gıda maliyet') || lower.includes('cogs') || lower.includes('hedef')) {
+          const over = pnl.filter(p => p.gida_maliyeti_orani > 32).sort((a, b) => b.gida_maliyeti_orani - a.gida_maliyeti_orani);
+          if (!over.length) return 'Tüm şubeler %32 gıda maliyeti hedef bandının içinde.';
+          return `%32 hedef gıda maliyeti bandını aşan ${over.length} şube bulunuyor:\n` +
+            over.map(p => `• ${p.sube_adi}: %${p.gida_maliyeti_orani} (Fire: ${fmtTL(p.fire_kaybi_tl)})`).join('\n');
+        }
+        if (lower.includes('satın alma') || lower.includes('zam') || lower.includes('tedarik') || lower.includes('fiyat')) {
+          const high = purchase.filter(p => p.fiyat_degisim_orani >= 6).sort((a, b) => b.fiyat_degisim_orani - a.fiyat_degisim_orani);
+          return `Fiyat artışı dikkat çeken satın alma kalemleri:\n` +
+            high.map(p => `• ${p.urun}: +%${p.fiyat_degisim_orani} (${p.onceki_fiyat}₺ → ${p.guncel_fiyat}₺, Ek maliyet: ${fmtTL(p.ek_maliyet_tl)})`).join('\n');
+        }
+        if (lower.includes('kâr') || lower.includes('karlı') || lower.includes('en iyi')) {
+          const top = [...pnl].sort((a, b) => b.net_kar_tl - a.net_kar_tl).slice(0, 3);
+          return `En yüksek net kâr üreten 3 şube:\n` +
+            top.map((p, i) => `${i + 1}. ${p.sube_adi}: ${fmtTL(p.net_kar_tl)} (Net Marj: %${p.net_marj_orani})`).join('\n');
+        }
+        if (lower.includes('istanbul')) {
+          const ist = state.data.pnlRows.filter(p => p.il === 'İstanbul');
+          return `İstanbul şubeleri özeti (${ist.length} şube):\n` +
+            ist.map(p => `• ${p.sube_adi}: Ciro ${fmtTL(p.aylik_ciro_tl)}, Gıda Mal. %${p.gida_maliyeti_orani}, Fire ${fmtTL(p.fire_kaybi_tl)}, Net Kâr ${fmtTL(p.net_kar_tl)}`).join('\n');
+        }
+        return `Seçili kapsamda ${pnl.length} şube, toplam ${fmtTL(pnl.reduce((a, c) => a + c.aylik_ciro_tl, 0))} ciro, ${anomalies.length} POS anomalisi ve ${fmtTL(stock.reduce((a, c) => a + c.fire_kaybi_tl, 0))} fire kaybı bulunuyor. "fire", "anomali", "gıda maliyeti", "satın alma" veya "en kârlı" kelimeleriyle daha spesifik analiz isteyebilirsiniz.`;
+      }
+
+      document.getElementById('csvUpload').addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          const text = ev.target.result.replace(/^\uFEFF/, '');
+          const lines = text.split(/\r?\n/).filter(l => l.trim());
+          if (lines.length < 2) return showToast('Geçersiz CSV dosyası.');
+          const sep = lines[0].includes(';') ? ';' : ',';
+          const headers = lines[0].split(sep).map(h => h.trim());
+          if (!headers.includes('ciro_tl') || !headers.includes('sube_id')) {
+            return showToast('CSV içinde "sube_id" ve "ciro_tl" kolonları bulunmalıdır.');
+          }
+          const parsed = lines.slice(1).map(line => {
+            const cols = line.split(sep);
+            const obj = {};
+            headers.forEach((h, i) => {
+              const raw = (cols[i] || '').replace(/^"|"$/g, '').trim();
+              obj[h] = ['ciro_tl', 'islem_adedi', 'ort_sepet_tl', 'pos_tl', 'nakit_tl', 'iptal_iade_tl', 'iptal_orani', 'indirim_tl', 'indirim_orani'].includes(h)
+                ? parseFloat(raw) || 0 : raw;
+            });
+            return obj;
+          });
+          state.data.posRows = parsed;
+          document.getElementById('dataStatus').textContent = `Canlı Yüklenen CSV: ${file.name} (${parsed.length} satır)`;
+          renderAll();
+          showToast(`${file.name} başarıyla yüklendi (${parsed.length} satır).`);
+        };
+        reader.readAsText(file, 'utf-8');
+      });
+
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+          document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+          btn.classList.add('active');
+          document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+        });
+      });
+
+      document.getElementById('cityFilter').addEventListener('change', (e) => {
+        state.city = e.target.value;
+        populateBranches();
+        renderAll();
+      });
+
+      document.getElementById('branchFilter').addEventListener('change', (e) => {
+        state.branch = e.target.value;
+        renderAll();
+      });
+
+      document.getElementById('btnExportReport').addEventListener('click', () => {
+        downloadCsv('GidaOps_Sube_Karlilik_Raporu.csv', filterByScope(state.data.pnlRows));
+      });
+      document.getElementById('btnExportAnomalies').addEventListener('click', () => {
+        downloadCsv('GidaOps_POS_Anomalileri.csv', filterByScope(state.data.anomalies));
+      });
+      document.getElementById('btnExportPO').addEventListener('click', () => {
+        downloadCsv('GidaOps_Merkezi_Satinalma_Taslago.csv', state.data.purchaseItems);
+      });
+
+      document.getElementById('btnCopyBrief').addEventListener('click', () => {
+        navigator.clipboard.writeText(document.getElementById('aiBriefBox').textContent)
+          .then(() => showToast('Yönetici brifingi panoya kopyalandı.'));
+      });
+
+      document.getElementById('btnCopyPrompt').addEventListener('click', () => {
+        const prompt = [
+          `Rol: Çok şubeli gıda/kantin işletmesi operasyon ve finans analisti.`,
+          `Gizlilik Notu: Aşağıdaki veriler KVKK uyumlu olarak anonimleştirilmiş özet metriklerdir; kişisel veri içermez.`,
+          ``,
+          document.getElementById('aiBriefBox').textContent,
+          ``,
+          `Görev: Bu verilere dayanarak üst yönetim için 1) Önümüzdeki 7 günün en kritik 3 operasyonel önceliğini, 2) Fireyi %35 azaltacak şube denetim kontrol listesini ve 3) Zam yapan tedarikçilerle pazarlık stratejisini maddeler halinde yaz.`
+        ].join('\n');
+        navigator.clipboard.writeText(prompt)
+          .then(() => showToast('KVKK-uyumlu ChatGPT/Copilot promptu kopyalandı.'));
+      });
+
+      function pushChat(q) {
+        const log = document.getElementById('chatLog');
+        log.innerHTML += `<div class="msg msg-user">${q}</div>`;
+        const ans = answerQuestion(q);
+        log.innerHTML += `<div class="msg msg-ai">${ans}</div>`;
+        log.scrollTop = log.scrollHeight;
+      }
+
+      document.getElementById('chatForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const inp = document.getElementById('chatInput');
+        const q = inp.value.trim();
+        if (!q) return;
+        inp.value = '';
+        pushChat(q);
+      });
+
+      document.querySelectorAll('.chip').forEach(ch => {
+        ch.addEventListener('click', () => pushChat(ch.dataset.q));
+      });
+
+      initFilters();
+      renderAll();
+    })();
+  </script>
+</body>
+</html>
