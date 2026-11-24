@@ -1,6 +1,7 @@
 # GıdaOps AI — Çok Şubeli Gıda & Kantin Operasyonları Otomasyon ve YZ Karar Destek Sistemi
 
 Çok noktalı hastane/üniversite kantini, kafe ve otomat operasyonları için geliştirilmiş; **Satış (POS), Depo/Stok, Üretim Tahmini, Merkezi Satın Alma, Finans (P&L) ve Üst Yönetim Raporlama** süreçlerini tek merkezde birleştiren operasyonel otomasyon ve yapay zekâ karar destek platformu.
+https://heydarbek.github.io/GIDAOPS/
 
 > **Not:** Uygulamadaki şube isimleri ve finansal değerler, sistemin tüm modüllerini göstermek amacıyla oluşturulmuş tamamen temsili (sentetik) verilerdir.
 
