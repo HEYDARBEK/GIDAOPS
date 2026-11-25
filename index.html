@@ -90,6 +90,44 @@
     .btn-outline:hover { background: var(--surface-alt); border-color: #cbd5e1; }
     .btn-success { background: var(--success); color: #fff; }
     .btn-success:hover { background: #047857; }
+    .btn-sm { padding: 4px 9px; font-size: 11.5px; border-radius: 6px; }
+    .btn-approve { background: var(--success-bg); color: var(--success); border: 1px solid #a7f3d0; }
+    .btn-approve:hover { background: var(--success); color: #fff; }
+    .btn-reject { background: var(--danger-bg); color: var(--danger); border: 1px solid #fecaca; }
+    .btn-reject:hover { background: var(--danger); color: #fff; }
+    .btn-warn-act { background: var(--warn-bg); color: var(--warn); border: 1px solid #fde68a; }
+    .btn-warn-act:hover { background: var(--warn); color: #fff; }
+    .hitl-bar {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      color: #166534;
+      padding: 10px 14px;
+      border-radius: 9px;
+      font-size: 12.5px;
+      margin-bottom: 14px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+    .audit-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      max-height: 180px;
+      overflow-y: auto;
+      font-size: 12.5px;
+    }
+    .audit-item {
+      padding: 7px 11px;
+      background: var(--surface-alt);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+    }
 
     .nav-tabs {
       background: var(--surface);
@@ -393,7 +431,8 @@
                 <th>Anomali Türü</th>
                 <th>Seviye</th>
                 <th>Ölçülen Değer</th>
-                <th>Önerilen Aksiyon / Açıklama</th>
+                <th>Önerilen Aksiyon</th>
+                <th>Çalışan Onayı / Durum</th>
               </tr>
             </thead>
             <tbody id="anomalyTable"></tbody>
@@ -510,11 +549,12 @@
       <div class="card">
         <div class="card-header">
           <div>
-            <div class="card-title">Merkezi Satın Alma Talep Havuzu & Tedarikçi Fiyat Artış Alarmları</div>
-            <div class="card-desc">Şubelerden gelen dağınık sipariş talepleri tek satın alma taslağında birleştirilir; %10+ zam yapan kalemler onay öncesi vurgulanır.</div>
+            <div class="card-title">Merkezi Satın Alma Talep Havuzu &amp; İnsan Onaylı Sipariş Akışı</div>
+            <div class="card-desc">Yapay zekâ şube taleplerini birleştirir ve fiyat artışlarını işaretler; <strong>son siparişi ilgili çalışan onaylar.</strong></div>
           </div>
-          <button class="btn btn-primary" id="btnExportPO">⬇ Merkezi Sipariş Taslağı (CSV)</button>
+          <button class="btn btn-primary" id="btnExportPO">⬇ Onaylı Sipariş Taslağı (CSV)</button>
         </div>
+        <div class="hitl-bar" id="poApprovalBar"></div>
         <div class="table-wrap">
           <table>
             <thead>
@@ -522,14 +562,12 @@
                 <th>Kod</th>
                 <th>Ürün</th>
                 <th>Tedarikçi</th>
-                <th class="num">Talep Eden Şube</th>
                 <th class="num">Toplam Miktar</th>
-                <th class="num">Önceki Fiyat</th>
-                <th class="num">Güncel Fiyat</th>
+                <th class="num">Önceki → Güncel</th>
                 <th class="num">Artış %</th>
-                <th class="num">Ek Maliyet Etkisi</th>
                 <th class="num">Sipariş Tutarı</th>
-                <th>Alarm</th>
+                <th>YZ Önerisi</th>
+                <th>Çalışan Kararı (Human-in-the-Loop)</th>
               </tr>
             </thead>
             <tbody id="purchaseTable"></tbody>
@@ -608,6 +646,18 @@
           </form>
         </div>
       </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">İnsan Onayı Denetim Kaydı (Human-in-the-Loop Audit Log)</div>
+            <div class="card-desc">Sistem önerileri üzerinde çalışanların verdiği tüm onay, red ve aksiyon kararları zaman damgasıyla izlenir.</div>
+          </div>
+        </div>
+        <div class="audit-list" id="auditLogList">
+          <div class="audit-item"><span style="color:var(--muted);">Henüz bir onay veya aksiyon kaydı yok. Satın Alma veya POS Anomali sekmesinden bir karar verdiğinizde burada canlı listelenir.</span></div>
+        </div>
+      </div>
     </section>
   </main>
 
@@ -619,8 +669,33 @@
       const state = {
         data: window.GIDAOPS_DATA,
         city: 'ALL',
-        branch: 'ALL'
+        branch: 'ALL',
+        poDecisions: {},
+        anomalyDecisions: {},
+        auditLogs: []
       };
+
+      function logAudit(moduleName, summary, badgeClass) {
+        const now = new Date();
+        const ts = now.toTimeString().slice(0, 8);
+        state.auditLogs.unshift({ ts, moduleName, summary, badgeClass });
+        renderAuditLog();
+      }
+
+      function renderAuditLog() {
+        const el = document.getElementById('auditLogList');
+        if (!el) return;
+        if (!state.auditLogs.length) {
+          el.innerHTML = '<div class="audit-item"><span style="color:var(--muted);">Henüz bir onay veya aksiyon kaydı yok. Satın Alma veya POS Anomali sekmesinden bir karar verdiğinizde burada canlı listelenir.</span></div>';
+          return;
+        }
+        el.innerHTML = state.auditLogs.map(item => `
+          <div class="audit-item">
+            <span><span class="badge ${item.badgeClass}" style="margin-right:6px;">${item.moduleName}</span>${item.summary}</span>
+            <span style="color:var(--muted);font-variant-numeric:tabular-nums;">${item.ts}</span>
+          </div>
+        `).join('');
+      }
 
       const fmtTL = (n) => Math.round(n).toLocaleString('tr-TR') + ' ₺';
       const fmtNum = (n) => Math.round(n).toLocaleString('tr-TR');
@@ -835,7 +910,18 @@
           <div class="kpi-card"><div class="kpi-label">Orta (İndirim Sapması)</div><div class="kpi-value">${medCount}</div><div class="kpi-sub">%6 eşiği üzeri indirim</div></div>
         `;
         document.getElementById('anomalyTable').innerHTML = anomalies.length
-          ? anomalies.map(a => `
+          ? anomalies.map((a, idx) => {
+            const key = `${a.tarih}|${a.sube_id}|${a.tur}`;
+            const dec = state.anomalyDecisions[key];
+            const actionHtml = dec === 'notified'
+              ? '<span class="badge badge-warn">Şubeye Bildirildi</span>'
+              : dec === 'closed'
+              ? '<span class="badge badge-success">İncelendi / Kapandı</span>'
+              : `<div style="display:flex;gap:5px;flex-wrap:nowrap;">
+                   <button class="btn btn-sm btn-warn-act" data-anom-act="notified" data-anom-key="${key}" data-anom-label="${a.sube_adi} (${a.tur})">Şubeye Bildir</button>
+                   <button class="btn btn-sm btn-approve" data-anom-act="closed" data-anom-key="${key}" data-anom-label="${a.sube_adi} (${a.tur})">İncelendi</button>
+                 </div>`;
+            return `
             <tr>
               <td>${a.tarih}</td>
               <td><strong>${a.sube_adi}</strong></td>
@@ -844,9 +930,10 @@
               <td><span class="badge ${a.seviye === 'Kritik' ? 'badge-danger' : a.seviye === 'Yüksek' ? 'badge-warn' : 'badge-info'}">${a.seviye}</span></td>
               <td>${a.deger}</td>
               <td>${a.aciklama}</td>
-            </tr>
-          `).join('')
-          : '<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:20px;">Seçili filtrede anomali tespit edilmedi.</td></tr>';
+              <td>${actionHtml}</td>
+            </tr>`;
+          }).join('')
+          : '<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:20px;">Seçili filtrede anomali tespit edilmedi.</td></tr>';
 
         const critStock = stock.filter(s => s.durum === 'Kritik').length;
         const avgWastePct = stock.length ? stock.reduce((a, c) => a + c.fire_orani, 0) / stock.length : 0;
@@ -914,21 +1001,46 @@
           <div class="kpi-card"><div class="kpi-label">Yüksek Zam Alarmı (%10+)</div><div class="kpi-value" style="color:var(--warn);">${poAlarms} Kalem</div><div class="kpi-sub warn">Alternatif teklif istenmeli</div></div>
           <div class="kpi-card"><div class="kpi-label">Merkezi Pazarlık Hedefi (%5)</div><div class="kpi-value" style="color:var(--success);">${fmtTL(poTotal * 0.05)}</div><div class="kpi-sub good">Toplu alım tasarruf potansiyeli</div></div>
         `;
-        document.getElementById('purchaseTable').innerHTML = purchase.map(p => `
+        const poApprovedCount = purchase.filter(p => state.poDecisions[p.kod] === 'approved').length;
+        const poRejectedCount = purchase.filter(p => state.poDecisions[p.kod] === 'rejected').length;
+        const poPendingCount = purchase.length - poApprovedCount - poRejectedCount;
+        const poApprovedTotal = purchase
+          .filter(p => state.poDecisions[p.kod] === 'approved')
+          .reduce((a, c) => a + c.toplam_tutar_tl, 0);
+
+        document.getElementById('poApprovalBar').innerHTML = `
+          <div><strong>İnsan Onaylı Akış:</strong> Sistem sipariş taslağını hazırlar, <strong>son karar çalışana aittir.</strong> Onaylanan tutar: <strong>${fmtTL(poApprovedTotal)}</strong></div>
+          <div>Bekleyen: <strong>${poPendingCount}</strong> • Onaylı: <strong style="color:var(--success);">${poApprovedCount}</strong> • Red/Revize: <strong style="color:var(--danger);">${poRejectedCount}</strong></div>
+        `;
+
+        document.getElementById('purchaseTable').innerHTML = purchase.map(p => {
+          const dec = state.poDecisions[p.kod];
+          const aiRec = p.fiyat_degisim_orani >= 10
+            ? '<span class="badge badge-danger">Alternatif Teklif İste</span>'
+            : p.fiyat_degisim_orani >= 6
+            ? '<span class="badge badge-warn">Pazarlık Önerilir</span>'
+            : '<span class="badge badge-success">Onaya Uygun</span>';
+          const decisionHtml = dec === 'approved'
+            ? `<div style="display:flex;align-items:center;gap:6px;"><span class="badge badge-success">✓ Onaylandı</span><button class="btn btn-sm btn-outline" data-po-act="reset" data-po-kod="${p.kod}" data-po-name="${p.urun}">Geri Al</button></div>`
+            : dec === 'rejected'
+            ? `<div style="display:flex;align-items:center;gap:6px;"><span class="badge badge-danger">✕ Revize / Red</span><button class="btn btn-sm btn-outline" data-po-act="reset" data-po-kod="${p.kod}" data-po-name="${p.urun}">Geri Al</button></div>`
+            : `<div style="display:flex;gap:5px;flex-wrap:nowrap;">
+                 <button class="btn btn-sm btn-approve" data-po-act="approved" data-po-kod="${p.kod}" data-po-name="${p.urun}">✓ Onayla</button>
+                 <button class="btn btn-sm btn-reject" data-po-act="rejected" data-po-kod="${p.kod}" data-po-name="${p.urun}">✕ Revize</button>
+               </div>`;
+          return `
           <tr>
             <td><code>${p.kod}</code></td>
             <td><strong>${p.urun}</strong></td>
             <td>${p.tedarikci}</td>
-            <td class="num">${p.talep_sube_sayisi} şube (${p.kritik_stok_sube} kritik)</td>
             <td class="num">${fmtNum(p.toplam_miktar)} ${p.birim}</td>
-            <td class="num">${p.onceki_fiyat.toFixed(2)} ₺</td>
-            <td class="num"><strong>${p.guncel_fiyat.toFixed(2)} ₺</strong></td>
+            <td class="num">${p.onceki_fiyat.toFixed(2)} → <strong>${p.guncel_fiyat.toFixed(2)} ₺</strong></td>
             <td class="num" style="color:${p.fiyat_degisim_orani >= 10 ? 'var(--danger)' : 'inherit'};font-weight:700;">+${fmtPct(p.fiyat_degisim_orani)}</td>
-            <td class="num">${fmtTL(p.ek_maliyet_tl)}</td>
             <td class="num"><strong>${fmtTL(p.toplam_tutar_tl)}</strong></td>
-            <td><span class="badge ${p.alarm === 'Yüksek Artış' ? 'badge-danger' : p.alarm === 'İncele' ? 'badge-warn' : 'badge-success'}">${p.alarm}</span></td>
-          </tr>
-        `).join('');
+            <td>${aiRec}</td>
+            <td>${decisionHtml}</td>
+          </tr>`;
+        }).join('');
 
         const totalRent = pnl.reduce((a, c) => a + c.kira_ihale_payi_tl, 0);
         const totalStaff = pnl.reduce((a, c) => a + c.personel_gideri_tl, 0);
@@ -1097,7 +1209,48 @@
         downloadCsv('GidaOps_POS_Anomalileri.csv', filterByScope(state.data.anomalies));
       });
       document.getElementById('btnExportPO').addEventListener('click', () => {
-        downloadCsv('GidaOps_Merkezi_Satinalma_Taslago.csv', state.data.purchaseItems);
+        const approved = state.data.purchaseItems.filter(p => state.poDecisions[p.kod] === 'approved');
+        if (approved.length) {
+          downloadCsv('GidaOps_Onayli_Satinalma_Siparisi.csv', approved.map(p => ({ ...p, calisan_onayi: 'ONAYLANDI' })));
+          logAudit('Satın Alma', `${approved.length} onaylı kalem için sipariş CSV dosyası dışa aktarıldı.`, 'badge-info');
+        } else {
+          const allWithStatus = state.data.purchaseItems.map(p => ({
+            ...p,
+            calisan_onayi: state.poDecisions[p.kod] === 'rejected' ? 'REVIZE_RED' : 'ONAY_BEKLIYOR'
+          }));
+          downloadCsv('GidaOps_Satinalma_Taslago_OnayBekleyen.csv', allWithStatus);
+          showToast('Henüz onaylı kalem yok; tüm liste "ONAY_BEKLIYOR" durumuyla indirildi.');
+        }
+      });
+
+      document.addEventListener('click', (e) => {
+        const poBtn = e.target.closest('[data-po-act]');
+        if (poBtn) {
+          const act = poBtn.dataset.poAct;
+          const kod = poBtn.dataset.poKod;
+          const name = poBtn.dataset.poName;
+          if (act === 'reset') {
+            delete state.poDecisions[kod];
+            logAudit('Satın Alma', `${kod} (${name}) kararı geri alındı → Beklemede.`, 'badge-info');
+          } else {
+            state.poDecisions[kod] = act;
+            const lbl = act === 'approved' ? 'Çalışan tarafından ONAYLANDI.' : 'Çalışan tarafından REVİZE/RED edildi (alternatif teklif).';
+            logAudit('Satın Alma', `${kod} (${name}) — ${lbl}`, act === 'approved' ? 'badge-success' : 'badge-danger');
+            showToast(`${kod}: ${act === 'approved' ? 'Sipariş onaylandı.' : 'Revize / alternatif teklife alındı.'}`);
+          }
+          renderAll();
+          return;
+        }
+        const anomBtn = e.target.closest('[data-anom-act]');
+        if (anomBtn) {
+          const act = anomBtn.dataset.anomAct;
+          const key = anomBtn.dataset.anomKey;
+          const label = anomBtn.dataset.anomLabel;
+          state.anomalyDecisions[key] = act;
+          logAudit('POS Anomali', `${label} — ${act === 'notified' ? 'Şube sorumlusuna uyarı iletildi.' : 'İncelendi ve kapatıldı.'}`, act === 'notified' ? 'badge-warn' : 'badge-success');
+          showToast(act === 'notified' ? 'Şube sorumlusuna bildirim kaydedildi.' : 'Anomali incelendi olarak kapatıldı.');
+          renderAll();
+        }
       });
 
       document.getElementById('btnCopyBrief').addEventListener('click', () => {
